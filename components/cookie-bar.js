@@ -3,6 +3,8 @@ import { AnimatePresence, m } from 'framer-motion'
 import FocusTrap from 'focus-trap-react'
 import Cookies from 'js-cookie'
 
+import { ErrorBoundary } from "react-error-boundary";
+
 import { useHasMounted } from '@lib/helpers'
 
 import CustomLink from '@components/link'
@@ -36,50 +38,52 @@ const CookieBar = React.memo(({ data = {} }) => {
   if (!hasMounted || !message) return null
 
   return (
-    <AnimatePresence>
-      <FocusTrap active={!acceptedCookies} focusTrapOptions={{ allowOutsideClick: true }}>
-          <m.div
-            initial="hide"
-            animate="show"
-            exit="hide"
-            variants={barAnim}
-            role="dialog"
-            aria-live="polite"
-            className="cookie-bar"
-          >
-            <div className="cookie-bar--content is-inverted">
-              <div className="cookie-bar--message">
-                <p>
-                  {message.split('\n').map((text, i) => {
-                    // using React.fragment to parse line breaks
-                    return (
-                      <React.Fragment key={i}>
-                        {text}
-                        {message.split('\n')[i + 1] && <br />}
-                      </React.Fragment>
-                    )
-                  })}
-                </p>
-              </div>
+    <ErrorBoundary fallback={<div>Something went wrong</div>}>
+      <AnimatePresence>
+        <FocusTrap active={!acceptedCookies} focusTrapOptions={{ allowOutsideClick: true }}>
+            <m.div
+              initial="hide"
+              animate="show"
+              exit="hide"
+              variants={barAnim}
+              role="dialog"
+              aria-live="polite"
+              className="cookie-bar"
+            >
+              <div className="cookie-bar--content is-inverted">
+                <div className="cookie-bar--message">
+                  <p>
+                    {message.split('\n').map((text, i) => {
+                      // using React.fragment to parse line breaks
+                      return (
+                        <React.Fragment key={i}>
+                          {text}
+                          {message.split('\n')[i + 1] && <br />}
+                        </React.Fragment>
+                      )
+                    })}
+                  </p>
+                </div>
 
-              <div className="cookie-bar--actions">
-                {link && (
-                  <CustomLink
-                    className="btn is-text"
-                    link={{ ...{ page: link }, ...{ title: 'Learn More' } }}
-                  />
-                )}
-                <button
-                  onClick={() => onAcceptCookies()}
-                  className="btn is-primary"
-                >
-                  Accept
-                </button>
+                <div className="cookie-bar--actions">
+                  {link && (
+                    <CustomLink
+                      className="btn is-text"
+                      link={{ ...{ page: link }, ...{ title: 'Learn More' } }}
+                    />
+                  )}
+                  <button
+                    onClick={() => onAcceptCookies()}
+                    className="btn is-primary"
+                  >
+                    Accept
+                  </button>
+                </div>
               </div>
-            </div>
-          </m.div>
-        </FocusTrap>
-    </AnimatePresence>
+            </m.div>
+          </FocusTrap>
+      </AnimatePresence>
+    </ErrorBoundary>
   )
 })
 
