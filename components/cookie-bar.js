@@ -38,7 +38,7 @@ const CookieBar = React.memo(({ data = {} }) => {
   if (!hasMounted || !message) return null
 
   return (
-    <ErrorBoundary fallback={<div>Something went wrong</div>}>
+    <ErrorBoundary fallback={<div></div>}>
       <AnimatePresence>
         <FocusTrap active={!acceptedCookies} focusTrapOptions={{ allowOutsideClick: true }}>
             <m.div
