@@ -3,11 +3,19 @@ import { AnimatePresence, m } from 'framer-motion'
 import FocusTrap from 'focus-trap-react'
 import Cookies from 'js-cookie'
 
-import { ErrorBoundary } from "react-error-boundary";
+import { ErrorBoundary, useErrorBoundary } from "react-error-boundary";
 
 import { useHasMounted } from '@lib/helpers'
 
 import CustomLink from '@components/link'
+
+function ErrorFallback({error, resetErrorBoundary}) {
+  return (
+    <div role="alert" onClick={resetErrorBoundary}>
+      {console.log(error.message)}
+    </div>
+  )
+}
 
 const barAnim = {
   show: {
@@ -38,51 +46,57 @@ const CookieBar = React.memo(({ data = {} }) => {
   if (!hasMounted || !message) return null
 
   return (
-    <ErrorBoundary fallback={<div></div>}>
+    <ErrorBoundary 
+      FallbackComponent={ErrorFallback}
+      onReset={() => {
+        onAcceptCookies()
+      }}>
       <AnimatePresence>
-        <FocusTrap active={!acceptedCookies} focusTrapOptions={{ allowOutsideClick: true }}>
-            <m.div
-              initial="hide"
-              animate="show"
-              exit="hide"
-              variants={barAnim}
-              role="dialog"
-              aria-live="polite"
-              className="cookie-bar"
-            >
-              <div className="cookie-bar--content is-inverted">
-                <div className="cookie-bar--message">
-                  <p>
-                    {message.split('\n').map((text, i) => {
-                      // using React.fragment to parse line breaks
-                      return (
-                        <React.Fragment key={i}>
-                          {text}
-                          {message.split('\n')[i + 1] && <br />}
-                        </React.Fragment>
-                      )
-                    })}
-                  </p>
-                </div>
-
-                <div className="cookie-bar--actions">
-                  {link && (
-                    <CustomLink
-                      className="btn is-text"
-                      link={{ ...{ page: link }, ...{ title: 'Learn More' } }}
-                    />
-                  )}
-                  <button
-                    onClick={() => onAcceptCookies()}
-                    className="btn is-primary"
-                  >
-                    Accept
-                  </button>
-                </div>
+      {!acceptedCookies && (
+        <FocusTrap focusTrapOptions={{ allowOutsideClick: true }}>
+          <m.div
+            initial="hide"
+            animate="show"
+            exit="hide"
+            variants={barAnim}
+            role="dialog"
+            aria-live="polite"
+            className="cookie-bar"
+          >
+            <div className="cookie-bar--content is-inverted">
+              <div className="cookie-bar--message">
+                <p>
+                  {message.split('\n').map((text, i) => {
+                    // using React.fragment to parse line breaks
+                    return (
+                      <React.Fragment key={i}>
+                        {text}
+                        {message.split('\n')[i + 1] && <br />}
+                      </React.Fragment>
+                    )
+                  })}
+                </p>
               </div>
-            </m.div>
-          </FocusTrap>
-      </AnimatePresence>
+
+              <div className="cookie-bar--actions">
+                {link && (
+                  <CustomLink
+                    className="btn is-text"
+                    link={{ ...{ page: link }, ...{ title: 'Learn More' } }}
+                  />
+                )}
+                <button
+                  onClick={() => onAcceptCookies()}
+                  className="btn is-primary"
+                >
+                  Accept
+                </button>
+              </div>
+            </div>
+          </m.div>
+        </FocusTrap>
+      )}
+    </AnimatePresence>
     </ErrorBoundary>
   )
 })
